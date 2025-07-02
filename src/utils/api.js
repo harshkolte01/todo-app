@@ -20,13 +20,13 @@ export const getUserByUsername = async (username, password) => {
 
 // --- TODOS ENDPOINTS ---
 
-export const getTodos = () => api.get('/todos');
+export const getTodos = (userId) => api.get(`/users/${userId}/todos`);
 
-export const getTodo = (id) => api.get(`/todos/${id}`);
+export const getTodo = (userId, todoId) => api.get(`/users/${userId}/todos/${todoId}`);
 
-export const createTodo = (todo) => api.post('/todos', todo);
+export const createTodo = (userId, todo) => api.post(`/users/${userId}/todos`, todo);
 
-export const updateTodo = (id, updatedTodo) =>
-  api.put(`/todos/${id}`, updatedTodo);
+export const updateTodo = (userId, todoId, updatedTodo) =>
+  api.put(`/users/${userId}/todos/${todoId}`, updatedTodo);
 
-export const deleteTodo = (id) => api.delete(`/todos/${id}`);
+export const deleteTodo = (userId, todoId) => api.delete(`/users/${userId}/todos/${todoId}`);

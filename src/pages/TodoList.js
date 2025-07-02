@@ -6,16 +6,21 @@ import {
   updateTodo,
   deleteTodo,
 } from '../redux/actions/todoActions';
+import Navbar from '../components/Navbar';
 
 export default function TodoList() {
   const dispatch = useDispatch();
-  const todos = useSelector((state) => state.todos.todos);
+  const todos = useSelector((state) => state.todos?.todos || []);
+  const user = JSON.parse(localStorage.getItem('user'));
+  const userId = user?.id;
 
   const [newTodoText, setNewTodoText] = useState('');
 
   useEffect(() => {
-    dispatch(fetchTodos());
-  }, [dispatch]);
+    if (userId) {
+      dispatch(fetchTodos(userId));
+    }
+  }, [dispatch, userId]);
 
   const handleAddTodo = () => {
     if (!newTodoText.trim()) return;
@@ -23,59 +28,67 @@ export default function TodoList() {
       text: newTodoText,
       completed: false,
       createdAt: new Date().toISOString(),
+      userId: userId,
     };
-    dispatch(addTodo(newTodo));
+    dispatch(addTodo(userId, newTodo));
     setNewTodoText('');
   };
 
   const handleToggleComplete = (todo) => {
-    dispatch(updateTodo({ ...todo, completed: !todo.completed }));
+    if (todo.userId !== userId) return;
+    dispatch(updateTodo(userId, { ...todo, completed: !todo.completed }));
   };
 
   const handleDelete = (id) => {
-    dispatch(deleteTodo(id));
+    const todo = todos.find(t => t.id === id);
+    if (!todo || todo.userId !== userId) return;
+    if (!todo.id) return;
+    dispatch(deleteTodo(userId, id));
   };
 
   return (
-    <div style={{ padding: '2rem', maxWidth: 500, margin: '0 auto' }}>
-      <h2>📝 My To-Do List</h2>
+    <>
+      <Navbar />
+      <div style={{ padding: '2rem', maxWidth: 500, margin: '0 auto' }}>
+        <h2>📝 My To-Do List</h2>
 
-      <div style={{ display: 'flex', marginBottom: '1rem' }}>
-        <input
-          type="text"
-          placeholder="Enter a new task..."
-          value={newTodoText}
-          onChange={(e) => setNewTodoText(e.target.value)}
-          style={{ flex: 1, padding: '0.5rem' }}
-        />
-        <button onClick={handleAddTodo} style={{ marginLeft: 8 }}>Add</button>
+        <div style={{ display: 'flex', marginBottom: '1rem' }}>
+          <input
+            type="text"
+            placeholder="Enter a new task..."
+            value={newTodoText}
+            onChange={(e) => setNewTodoText(e.target.value)}
+            style={{ flex: 1, padding: '0.5rem' }}
+          />
+          <button onClick={handleAddTodo} style={{ marginLeft: 8 }}>Add</button>
+        </div>
+
+        {todos.length === 0 ? (
+          <p>No tasks yet.</p>
+        ) : (
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            {todos.map((todo) => (
+              <li key={todo.id} style={{ display: 'flex', marginBottom: 10 }}>
+                <input
+                  type="checkbox"
+                  checked={todo.completed}
+                  onChange={() => handleToggleComplete(todo)}
+                />
+                <span
+                  style={{
+                    flex: 1,
+                    marginLeft: 10,
+                    textDecoration: todo.completed ? 'line-through' : 'none',
+                  }}
+                >
+                  {todo.text}
+                </span>
+                <button onClick={() => handleDelete(todo.id)}>❌</button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
-
-      {todos.length === 0 ? (
-        <p>No tasks yet.</p>
-      ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {todos.map((todo) => (
-            <li key={todo.id} style={{ display: 'flex', marginBottom: 10 }}>
-              <input
-                type="checkbox"
-                checked={todo.completed}
-                onChange={() => handleToggleComplete(todo)}
-              />
-              <span
-                style={{
-                  flex: 1,
-                  marginLeft: 10,
-                  textDecoration: todo.completed ? 'line-through' : 'none',
-                }}
-              >
-                {todo.text}
-              </span>
-              <button onClick={() => handleDelete(todo.id)}>❌</button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    </>
   );
 }

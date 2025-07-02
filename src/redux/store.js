@@ -1,10 +1,12 @@
-import { configureStore } from '@reduxjs/toolkit';
-import { combineReducers } from 'redux';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
 
 import authReducer from './reducers/authReducer';
 import todoReducer from './reducers/todoReducer';
+
+console.log('authReducer:', authReducer);
+console.log('todoReducer:', todoReducer);
 
 const rootReducer = combineReducers({
   auth: authReducer,
