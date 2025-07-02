@@ -5,13 +5,13 @@ import {
   addTodo,
   updateTodo,
   deleteTodo,
-} from '../redux/actions/todoActions';
-import Navbar from '../components/Navbar';
-import Button from '../components/ui/Button';
+} from '../../redux/actions/todoActions';
+import Navbar from '../../components/Navbar';
+import Button from '../../components/ui/Button';
 import { Trash2, CheckSquare, Square, Pencil } from 'lucide-react';
-import ModalPrompt from '../components/ui/ModalPrompt';
-import Loading from '../components/ui/Loading';
-import './TodoList.css';
+import ModalPrompt from '../../components/ui/ModalPrompt';
+import Loading from '../../components/ui/Loading';
+import '../../pages/todolist/TodoList.css';
 
 export default function TodoList() {
   const dispatch = useDispatch();

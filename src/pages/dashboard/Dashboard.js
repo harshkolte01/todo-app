@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import Navbar from '../components/Navbar';
-import './Dashboard.css';
+import Navbar from '../../components/Navbar';
+import '../../pages/dashboard/Dashboard.css';
 
 export default function Dashboard() {
   const user = JSON.parse(localStorage.getItem('user'));

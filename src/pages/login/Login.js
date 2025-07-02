@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUserByUsername } from '../utils/api';
+import { getUserByUsername } from '../../utils/api';
 import axios from 'axios';
-import Navbar from '../components/Navbar';
-import Button from '../components/ui/Button';
-import Loading from '../components/ui/Loading';
-import './Login.css';
+import Navbar from '../../components/Navbar';
+import Button from '../../components/ui/Button';
+import Loading from '../../components/ui/Loading';
+import '../../pages/login/Login.css';
 
 const API_URL = 'https://6863849488359a373e952694.mockapi.io/api/users';
 

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import Login from '../pages/Login';
-import TodoList from '../pages/TodoList';
-import Dashboard from '../pages/Dashboard'; 
+import Login from '../pages/login/Login';
+import TodoList from '../pages/todolist/TodoList';
+import Dashboard from '../pages/dashboard/Dashboard'; 
 import AuthProtector from '../components/AuthProtector';
 
 export default function AppRoutes() {
