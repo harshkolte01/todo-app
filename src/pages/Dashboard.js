@@ -12,6 +12,9 @@ export default function Dashboard() {
   // Filter state
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [sortOrder, setSortOrder] = useState('desc'); // desc = newest first
 
   // Filtering logic
   const filteredTodos = userTodos.filter(todo => {
@@ -24,7 +27,14 @@ export default function Dashboard() {
       (priorityFilter === '1' && todo.priority === 1) ||
       (priorityFilter === '2' && todo.priority === 2) ||
       (priorityFilter === '3' && todo.priority === 3);
-    return statusMatch && priorityMatch;
+    const created = todo.createdAt ? new Date(todo.createdAt) : null;
+    const startMatch = !startDate || (created && created >= new Date(startDate));
+    const endMatch = !endDate || (created && created <= new Date(endDate + 'T23:59:59'));
+    return statusMatch && priorityMatch && startMatch && endMatch;
+  }).sort((a, b) => {
+    const dateA = a.createdAt ? new Date(a.createdAt) : 0;
+    const dateB = b.createdAt ? new Date(b.createdAt) : 0;
+    return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
   });
 
   return (
@@ -51,6 +61,30 @@ export default function Dashboard() {
             <option value="1">High</option>
             <option value="2">Medium</option>
             <option value="3">Low</option>
+          </select>
+          <input
+            type="date"
+            className="dashboard-filter-select dashboard-date-input"
+            value={startDate}
+            onChange={e => setStartDate(e.target.value)}
+            max={endDate || undefined}
+            placeholder="Start date"
+          />
+          <input
+            type="date"
+            className="dashboard-filter-select dashboard-date-input"
+            value={endDate}
+            onChange={e => setEndDate(e.target.value)}
+            min={startDate || undefined}
+            placeholder="End date"
+          />
+          <select
+            className="dashboard-filter-select"
+            value={sortOrder}
+            onChange={e => setSortOrder(e.target.value)}
+          >
+            <option value="desc">Newest First</option>
+            <option value="asc">Oldest First</option>
           </select>
         </div>
         <table className="dashboard-tasks-table">

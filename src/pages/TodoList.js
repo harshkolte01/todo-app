@@ -8,8 +8,9 @@ import {
 } from '../redux/actions/todoActions';
 import Navbar from '../components/Navbar';
 import Button from '../components/ui/Button';
-import { Trash2, CheckSquare, Square } from 'lucide-react';
+import { Trash2, CheckSquare, Square, Pencil } from 'lucide-react';
 import ModalPrompt from '../components/ui/ModalPrompt';
+import Loading from '../components/ui/Loading';
 import './TodoList.css';
 
 export default function TodoList() {
@@ -24,6 +25,10 @@ export default function TodoList() {
   const [modalLoading, setModalLoading] = useState(false);
   const [modalSuccess, setModalSuccess] = useState('');
   const [todoToDelete, setTodoToDelete] = useState(null);
+  const [editId, setEditId] = useState(null);
+  const [editText, setEditText] = useState('');
+  const [editPriority, setEditPriority] = useState(2);
+  const [editLoading, setEditLoading] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -74,6 +79,28 @@ export default function TodoList() {
     setModalLoading(false);
     setModalSuccess('');
     setTodoToDelete(null);
+  };
+
+  const startEdit = (todo) => {
+    setEditId(todo.id);
+    setEditText(todo.text);
+    setEditPriority(todo.priority || 2);
+  };
+
+  const cancelEdit = () => {
+    setEditId(null);
+    setEditText('');
+    setEditPriority(2);
+    setEditLoading(false);
+  };
+
+  const saveEdit = async () => {
+    setEditLoading(true);
+    await dispatch(updateTodo(userId, { id: editId, text: editText, priority: editPriority }));
+    setEditLoading(false);
+    setEditId(null);
+    setEditText('');
+    setEditPriority(2);
   };
 
   const userTodos = todos.filter(todo => todo.userId === userId);
@@ -131,9 +158,43 @@ export default function TodoList() {
                   {todo.text}
                 </span>
                 {todo.userId === userId && (
-                  <button onClick={() => handleDelete(todo.id)} className="todo-delete-btn" aria-label="Delete">
-                    <Trash2 size={22} color="#f43f5e" strokeWidth={2.2} />
-                  </button>
+                  <>
+                    {editId === todo.id ? (
+                      <>
+                        <input
+                          className="todo-input todo-edit-input"
+                          value={editText}
+                          onChange={e => setEditText(e.target.value)}
+                          style={{ marginRight: 8, minWidth: 80 }}
+                        />
+                        <select
+                          className="todo-priority-select"
+                          value={editPriority}
+                          onChange={e => setEditPriority(Number(e.target.value))}
+                          style={{ marginRight: 8 }}
+                        >
+                          <option value={1}>High</option>
+                          <option value={2}>Medium</option>
+                          <option value={3}>Low</option>
+                        </select>
+                        <Button className="todo-add-btn" onClick={saveEdit} disabled={editLoading} style={{marginRight: 6, minWidth: 70}}>
+                          {editLoading ? (<><Loading small /> Save...</>) : 'Save'}
+                        </Button>
+                        <Button className="todo-add-btn todo-cancel-btn" onClick={cancelEdit} disabled={editLoading} style={{minWidth: 70}}>
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <button onClick={() => startEdit(todo)} className="todo-edit-btn" aria-label="Edit">
+                          <Pencil size={20} color="#6366f1" strokeWidth={2.2} />
+                        </button>
+                        <button onClick={() => handleDelete(todo.id)} className="todo-delete-btn" aria-label="Delete">
+                          <Trash2 size={22} color="#f43f5e" strokeWidth={2.2} />
+                        </button>
+                      </>
+                    )}
+                  </>
                 )}
               </li>
             ))}
