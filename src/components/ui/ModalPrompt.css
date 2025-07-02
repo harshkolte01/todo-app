@@ -1,0 +1,68 @@
+.modal-prompt-backdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(30, 41, 59, 0.18);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modalFadeIn 0.25s;
+}
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.modal-prompt-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 40px #6366f144;
+  padding: 2.2rem 2.2rem 1.5rem 2.2rem;
+  min-width: 320px;
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: modalScaleIn 0.28s cubic-bezier(0.77,0,0.18,1);
+}
+@keyframes modalScaleIn {
+  from { transform: scale(0.92); opacity: 0.5; }
+  to { transform: scale(1); opacity: 1; }
+}
+.modal-prompt-message {
+  font-size: 1.18rem;
+  color: #3730a3;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+.modal-prompt-actions {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  width: 100%;
+}
+.modal-prompt-btn {
+  min-width: 90px;
+  font-size: 1.08rem;
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #6366f122;
+}
+.modal-prompt-cancel {
+  background: linear-gradient(90deg, #e0e7ff 0%, #f8fafc 100%);
+  color: #6366f1;
+  border: 1.5px solid #c7d2fe;
+}
+@media (max-width: 500px) {
+  .modal-prompt-card {
+    min-width: 0;
+    padding: 1.2rem 0.5rem 1rem 0.5rem;
+  }
+  .modal-prompt-message {
+    font-size: 1rem;
+  }
+  .modal-prompt-btn {
+    font-size: 1rem;
+    padding: 0.6rem 0.7rem;
+  }
+} 
