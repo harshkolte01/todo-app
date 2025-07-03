@@ -26,8 +26,6 @@ export default function TodoList() {
   const [modalSuccess, setModalSuccess] = useState('');
   const [todoToDelete, setTodoToDelete] = useState(null);
   const [editId, setEditId] = useState(null);
-  const [editText, setEditText] = useState('');
-  const [editPriority, setEditPriority] = useState(2);
   const [editLoading, setEditLoading] = useState(false);
 
   useEffect(() => {
@@ -83,24 +81,24 @@ export default function TodoList() {
 
   const startEdit = (todo) => {
     setEditId(todo.id);
-    setEditText(todo.text);
-    setEditPriority(todo.priority || 2);
+    setNewTodoText(todo.text);
+    setNewTodoPriority(todo.priority || 2);
   };
 
   const cancelEdit = () => {
     setEditId(null);
-    setEditText('');
-    setEditPriority(2);
+    setNewTodoText('');
+    setNewTodoPriority(2);
     setEditLoading(false);
   };
 
   const saveEdit = async () => {
     setEditLoading(true);
-    await dispatch(updateTodo(userId, { id: editId, text: editText, priority: editPriority }));
+    await dispatch(updateTodo(userId, { id: editId, text: newTodoText, priority: newTodoPriority }));
     setEditLoading(false);
     setEditId(null);
-    setEditText('');
-    setEditPriority(2);
+    setNewTodoText('');
+    setNewTodoPriority(2);
   };
 
   const userTodos = todos.filter(todo => todo.userId === userId);
@@ -113,11 +111,15 @@ export default function TodoList() {
         <div className="todo-input-row">
           <input
             type="text"
-            placeholder="Enter a new task..."
+            placeholder={editId ? "Edit your task..." : "Enter a new task..."}
             value={newTodoText}
             onChange={(e) => setNewTodoText(e.target.value)}
             className="todo-input"
-            onKeyDown={e => { if (e.key === 'Enter') handleAddTodo(); }}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                editId ? saveEdit() : handleAddTodo();
+              }
+            }}
           />
           <select
             className="todo-priority-select"
@@ -128,9 +130,20 @@ export default function TodoList() {
             <option value={2}>Medium</option>
             <option value={3}>Low</option>
           </select>
-          <Button className="todo-add-btn" onClick={handleAddTodo}>
-            Add
-          </Button>
+          {editId ? (
+            <>
+              <Button className="todo-add-btn" onClick={saveEdit} disabled={editLoading}>
+                {editLoading ? (<><Loading small /> Save...</>) : 'Save'}
+              </Button>
+              <Button className="todo-add-btn todo-cancel-btn" onClick={cancelEdit} disabled={editLoading}>
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <Button className="todo-add-btn" onClick={handleAddTodo}>
+              Add
+            </Button>
+          )}
         </div>
         {userTodos.length === 0 ? (
           <p className="todo-empty">No tasks yet.</p>
@@ -159,41 +172,12 @@ export default function TodoList() {
                 </span>
                 {todo.userId === userId && (
                   <>
-                    {editId === todo.id ? (
-                      <>
-                        <input
-                          className="todo-input todo-edit-input"
-                          value={editText}
-                          onChange={e => setEditText(e.target.value)}
-                          style={{ marginRight: 8, minWidth: 80 }}
-                        />
-                        <select
-                          className="todo-priority-select"
-                          value={editPriority}
-                          onChange={e => setEditPriority(Number(e.target.value))}
-                          style={{ marginRight: 8 }}
-                        >
-                          <option value={1}>High</option>
-                          <option value={2}>Medium</option>
-                          <option value={3}>Low</option>
-                        </select>
-                        <Button className="todo-add-btn" onClick={saveEdit} disabled={editLoading} style={{marginRight: 6, minWidth: 70}}>
-                          {editLoading ? (<><Loading small /> Save...</>) : 'Save'}
-                        </Button>
-                        <Button className="todo-add-btn todo-cancel-btn" onClick={cancelEdit} disabled={editLoading} style={{minWidth: 70}}>
-                          Cancel
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <button onClick={() => startEdit(todo)} className="todo-edit-btn" aria-label="Edit">
-                          <Pencil size={20} color="#6366f1" strokeWidth={2.2} />
-                        </button>
-                        <button onClick={() => handleDelete(todo.id)} className="todo-delete-btn" aria-label="Delete">
-                          <Trash2 size={22} color="#f43f5e" strokeWidth={2.2} />
-                        </button>
-                      </>
-                    )}
+                    <button onClick={() => startEdit(todo)} className="todo-edit-btn" aria-label="Edit">
+                      <Pencil size={20} color="#6366f1" strokeWidth={2.2} />
+                    </button>
+                    <button onClick={() => handleDelete(todo.id)} className="todo-delete-btn" aria-label="Delete">
+                      <Trash2 size={22} color="#f43f5e" strokeWidth={2.2} />
+                    </button>
                   </>
                 )}
               </li>
