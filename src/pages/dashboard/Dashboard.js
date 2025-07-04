@@ -16,6 +16,10 @@ export default function Dashboard() {
   const [endDate, setEndDate] = useState('');
   const [sortOrder, setSortOrder] = useState('desc'); // desc = newest first
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const tasksPerPage = 3;
+
   // Filtering logic
   const filteredTodos = userTodos.filter(todo => {
     const statusMatch =
@@ -36,6 +40,60 @@ export default function Dashboard() {
     const dateB = b.createdAt ? new Date(b.createdAt) : 0;
     return sortOrder === 'desc' ? dateB - dateA : dateA - dateB;
   });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredTodos.length / tasksPerPage);
+  const startIndex = (currentPage - 1) * tasksPerPage;
+  const endIndex = startIndex + tasksPerPage;
+  const currentTodos = filteredTodos.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, priorityFilter, startDate, endDate, sortOrder]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const getPageNumbers = () => {
+    const pages = [];
+    
+    if (totalPages <= 4) {
+      // Show all pages if 4 or fewer
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+      
+      if (currentPage <= 3) {
+        // Near the beginning: 1, 2, 3, 4, ..., last
+        for (let i = 2; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        // Near the end: 1, ..., last-3, last-2, last-1, last
+        pages.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // In the middle: 1, ..., current-1, current, current+1, ..., last
+        pages.push('...');
+        pages.push(currentPage - 1);
+        pages.push(currentPage);
+        pages.push(currentPage + 1);
+        pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
 
   return (
     <>
@@ -97,10 +155,10 @@ export default function Dashboard() {
             </tr>
           </thead>
           <tbody>
-            {filteredTodos.length === 0 ? (
+            {currentTodos.length === 0 ? (
               <tr><td colSpan={4} style={{textAlign: 'center', color: '#a0aec0'}}>No tasks found.</td></tr>
             ) : (
-              filteredTodos.map((todo) => (
+              currentTodos.map((todo) => (
                 <tr key={todo.id}>
                   <td>{todo.text || todo.title}</td>
                   <td>
@@ -119,6 +177,40 @@ export default function Dashboard() {
             )}
           </tbody>
         </table>
+        
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="dashboard-pagination">
+            <button
+              className="pagination-btn"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            
+            <div className="pagination-numbers">
+              {getPageNumbers().map((page, index) => (
+                <button
+                  key={index}
+                  className={`pagination-number ${page === currentPage ? 'active' : ''} ${page === '...' ? 'ellipsis' : ''}`}
+                  onClick={() => page !== '...' && handlePageChange(page)}
+                  disabled={page === '...'}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+            
+            <button
+              className="pagination-btn"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

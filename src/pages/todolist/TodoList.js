@@ -28,6 +28,10 @@ export default function TodoList() {
   const [editId, setEditId] = useState(null);
   const [editLoading, setEditLoading] = useState(false);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const tasksPerPage = 3;
+
   useEffect(() => {
     if (userId) {
       dispatch(fetchTodos(userId));
@@ -101,7 +105,67 @@ export default function TodoList() {
     setNewTodoPriority(2);
   };
 
-  const userTodos = todos.filter(todo => todo.userId === userId);
+  const userTodos = todos
+    .filter(todo => todo.userId === userId)
+    .sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt) : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt) : 0;
+      return dateB - dateA; // Newest first
+    });
+
+  // Pagination logic
+  const totalPages = Math.ceil(userTodos.length / tasksPerPage);
+  const startIndex = (currentPage - 1) * tasksPerPage;
+  const endIndex = startIndex + tasksPerPage;
+  const currentTodos = userTodos.slice(startIndex, endIndex);
+
+  // Reset to first page when todos change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [userTodos.length]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const getPageNumbers = () => {
+    const pages = [];
+    
+    if (totalPages <= 4) {
+      // Show all pages if 4 or fewer
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+      
+      if (currentPage <= 3) {
+        // Near the beginning: 1, 2, 3, 4, ..., last
+        for (let i = 2; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push('...');
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        // Near the end: 1, ..., last-3, last-2, last-1, last
+        pages.push('...');
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // In the middle: 1, ..., current-1, current, current+1, ..., last
+        pages.push('...');
+        pages.push(currentPage - 1);
+        pages.push(currentPage);
+        pages.push(currentPage + 1);
+        pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
 
   return (
     <>
@@ -148,41 +212,80 @@ export default function TodoList() {
         {userTodos.length === 0 ? (
           <p className="todo-empty">No tasks yet.</p>
         ) : (
-          <ul className="todo-list">
-            {userTodos.map((todo) => (
-              <li key={todo.id} className="todo-item">
-                <span
-                  className="todo-checkbox"
-                  onClick={() => todo.userId === userId && handleToggleComplete(todo)}
-                  tabIndex={0}
-                  role="checkbox"
-                  aria-checked={todo.completed}
-                  style={{ cursor: todo.userId === userId ? 'pointer' : 'not-allowed', opacity: todo.userId === userId ? 1 : 0.5 }}
-                >
-                  {todo.completed ? (
-                    <CheckSquare size={22} color="#6366f1" fill="#e0e7ff" strokeWidth={2.2} />
-                  ) : (
-                    <Square size={22} color="#a0aec0" strokeWidth={2.2} />
+          <>
+            <ul className="todo-list">
+              {currentTodos.map((todo) => (
+                <li key={todo.id} className="todo-item">
+                  <span
+                    className="todo-checkbox"
+                    onClick={() => todo.userId === userId && handleToggleComplete(todo)}
+                    tabIndex={0}
+                    role="checkbox"
+                    aria-checked={todo.completed}
+                    style={{ cursor: todo.userId === userId ? 'pointer' : 'not-allowed', opacity: todo.userId === userId ? 1 : 0.5 }}
+                  >
+                    {todo.completed ? (
+                      <CheckSquare size={22} color="#6366f1" fill="#e0e7ff" strokeWidth={2.2} />
+                    ) : (
+                      <Square size={22} color="#a0aec0" strokeWidth={2.2} />
+                    )}
+                  </span>
+                  <span
+                    className={todo.completed ? 'todo-text completed' : 'todo-text'}
+                  >
+                    {todo.text}
+                  </span>
+                  <span className={`todo-priority priority-${todo.priority || 2}`}>
+                    {todo.priority === 1 ? 'High' : todo.priority === 3 ? 'Low' : 'Medium'}
+                  </span>
+                  {todo.userId === userId && (
+                    <>
+                      <button onClick={() => startEdit(todo)} className="todo-edit-btn" aria-label="Edit">
+                        <Pencil size={20} color="#6366f1" strokeWidth={2.2} />
+                      </button>
+                      <button onClick={() => handleDelete(todo.id)} className="todo-delete-btn" aria-label="Delete">
+                        <Trash2 size={22} color="#f43f5e" strokeWidth={2.2} />
+                      </button>
+                    </>
                   )}
-                </span>
-                <span
-                  className={todo.completed ? 'todo-text completed' : 'todo-text'}
+                </li>
+              ))}
+            </ul>
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="todo-pagination">
+                <button
+                  className="pagination-btn"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
                 >
-                  {todo.text}
-                </span>
-                {todo.userId === userId && (
-                  <>
-                    <button onClick={() => startEdit(todo)} className="todo-edit-btn" aria-label="Edit">
-                      <Pencil size={20} color="#6366f1" strokeWidth={2.2} />
+                  Previous
+                </button>
+                
+                <div className="pagination-numbers">
+                  {getPageNumbers().map((page, index) => (
+                    <button
+                      key={index}
+                      className={`pagination-number ${page === currentPage ? 'active' : ''} ${page === '...' ? 'ellipsis' : ''}`}
+                      onClick={() => page !== '...' && handlePageChange(page)}
+                      disabled={page === '...'}
+                    >
+                      {page}
                     </button>
-                    <button onClick={() => handleDelete(todo.id)} className="todo-delete-btn" aria-label="Delete">
-                      <Trash2 size={22} color="#f43f5e" strokeWidth={2.2} />
-                    </button>
-                  </>
-                )}
-              </li>
-            ))}
-          </ul>
+                  ))}
+                </div>
+                
+                <button
+                  className="pagination-btn"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
       <ModalPrompt
