@@ -18,7 +18,7 @@ export default function Dashboard() {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const tasksPerPage = 3;
+  const [tasksPerPage, setTasksPerPage] = useState(5);
 
   // Filtering logic
   const filteredTodos = userTodos.filter(todo => {
@@ -47,10 +47,10 @@ export default function Dashboard() {
   const endIndex = startIndex + tasksPerPage;
   const currentTodos = filteredTodos.slice(startIndex, endIndex);
 
-  // Reset to first page when filters change
+  // Reset to first page when filters or tasksPerPage change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter, priorityFilter, startDate, endDate, sortOrder]);
+  }, [statusFilter, priorityFilter, startDate, endDate, sortOrder, tasksPerPage]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -100,6 +100,23 @@ export default function Dashboard() {
       <Navbar />
       <div className="dashboard-container">
         <h2>My Tasks Overview</h2>
+        <div className="dashboard-list-controls">
+          <label htmlFor="dashboard-todos-per-page" style={{ fontWeight: 600, marginRight: 8 }}>Todos per page:</label>
+          <select
+            id="dashboard-todos-per-page"
+            className="dashboard-per-page-select"
+            value={tasksPerPage}
+            onChange={e => setTasksPerPage(Number(e.target.value))}
+          >
+            <option value={3}>3</option>
+            <option value={5}>5</option>
+            <option value={6}>6</option>
+            <option value={7}>7</option>
+            <option value={8}>8</option>
+            <option value={9}>9</option>
+            <option value={10}>10</option>
+          </select>
+        </div>
         <div className="dashboard-filters-row">
           <select
             className="dashboard-filter-select"

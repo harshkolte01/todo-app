@@ -30,7 +30,7 @@ export default function TodoList() {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const tasksPerPage = 3;
+  const [tasksPerPage, setTasksPerPage] = useState(5);
 
   useEffect(() => {
     if (userId) {
@@ -119,10 +119,10 @@ export default function TodoList() {
   const endIndex = startIndex + tasksPerPage;
   const currentTodos = userTodos.slice(startIndex, endIndex);
 
-  // Reset to first page when todos change
+  // Reset to first page when todos or tasksPerPage change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [userTodos.length]);
+  }, [userTodos.length, tasksPerPage]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -172,6 +172,23 @@ export default function TodoList() {
       <Navbar />
       <div className="todo-container">
         <h2>📝 <span style={{fontWeight: 700}}>My To-Do List</span></h2>
+        <div className="todo-list-controls">
+          <label htmlFor="todos-per-page" style={{ fontWeight: 600, marginRight: 8 }}>Todos per page:</label>
+          <select
+            id="todos-per-page"
+            className="todo-per-page-select"
+            value={tasksPerPage}
+            onChange={e => setTasksPerPage(Number(e.target.value))}
+          >
+            <option value={3}>3</option>
+            <option value={5}>5</option>
+            <option value={6}>6</option>
+            <option value={7}>7</option>
+            <option value={8}>8</option>
+            <option value={9}>9</option>
+            <option value={10}>10</option>
+          </select>
+        </div>
         <div className="todo-input-row">
           <input
             type="text"

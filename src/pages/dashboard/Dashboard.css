@@ -223,4 +223,38 @@
   .pagination-numbers {
     order: -1;
   }
+}
+.dashboard-list-controls {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.2rem;
+  width: 100%;
+  justify-content: flex-end;
+}
+.dashboard-per-page-select {
+  border: 1.5px solid #c7d2fe;
+  border-radius: 8px;
+  padding: 0.5rem 1.1rem;
+  font-size: 1.05rem;
+  background: #f8fafc;
+  color: #3730a3;
+  font-weight: 600;
+  outline: none;
+  transition: border 0.2s;
+  box-shadow: 0 1px 4px #6366f111;
+}
+.dashboard-per-page-select:focus {
+  border: 1.5px solid #6366f1;
+}
+@media (max-width: 600px) {
+  .dashboard-list-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .dashboard-per-page-select {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.5rem 0.7rem;
+  }
 } 
